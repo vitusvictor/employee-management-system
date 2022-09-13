@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -60,4 +61,5 @@ public class User extends BaseClass {
    @OneToOne
    @JoinColumn(name = "salary_id", referencedColumnName = "id")
    private Salary salary;
+
 }
