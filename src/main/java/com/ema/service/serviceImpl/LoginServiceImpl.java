@@ -1,6 +1,9 @@
 package com.ema.service.serviceImpl;
 
 import com.ema.dto.LoginRequestPayLoad;
+import com.ema.entity.User;
+import com.ema.enums.UserStatus;
+import com.ema.exceptions.UsernameNotFoundException;
 import com.ema.repository.UserRepository;
 import com.ema.security.filter.JwtUtils;
 import com.ema.service.LoginService;
@@ -22,6 +25,12 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public String login(LoginRequestPayLoad loginRequestPayLoad) {
+        User user = userRepository.findByEmail(loginRequestPayLoad.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("user not found!"));
+
+        if(user.getUserStatus() != UserStatus.ACTIVE){
+            return "Please verify your email";
+        }
         return null;
     }
 }
