@@ -1,4 +1,4 @@
-package com.ema.service.impl;
+package com.ema.service.serviceImpl;
 
 import com.ema.dto.SendMailDto;
 import com.ema.service.MailService;
@@ -13,8 +13,7 @@ public class UserServiceImpl {
     private final MailService mailService;
 
     public String sendMail(SendMailDto sendMailDto) {
-        mailService.sendMail(sendMailDto);
-        return "mail sent";
+        return mailService.sendMail(sendMailDto);
     }
 
     public String mailWithAttachments(SendMailDto sendMailDto) throws MessagingException {

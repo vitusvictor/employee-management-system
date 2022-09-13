@@ -1,6 +1,6 @@
-package com.ema.service.impl;
+package com.ema.service.serviceImpl;
 
-import com.ema.customExceptions.FailedMailException;
+import com.ema.exceptions.FailedMailException;
 import com.ema.dto.SendMailDto;
 import com.ema.service.MailService;
 import lombok.RequiredArgsConstructor;
