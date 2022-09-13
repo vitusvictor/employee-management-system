@@ -1,0 +1,11 @@
+package com.ema.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Setter;
+
+@Setter
+@AllArgsConstructor
+public class LoginResponseDto {
+
+    String token;
+}

@@ -1,6 +1,7 @@
 package com.ema.entity;
 
 import com.ema.enums.Role;
+import com.ema.enums.UserStatus;
 import lombok.*;
 
 import javax.persistence.*;
@@ -37,6 +38,12 @@ public class User extends BaseClass {
 
    @NotNull
    private String Address;
+
+   @NotNull
+   private boolean isEmailVerified;
+
+   @NotNull
+   private UserStatus userStatus;
 
    @Enumerated(EnumType.STRING)
    private Role role;
