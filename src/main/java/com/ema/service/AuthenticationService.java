@@ -2,7 +2,9 @@ package com.ema.service;
 
 import com.ema.dto.LoginRequestPayLoad;
 
-public interface LoginService {
+public interface AuthenticationService {
 
     String login(LoginRequestPayLoad loginRequestPayLoad);
+
+    String logout();
 }

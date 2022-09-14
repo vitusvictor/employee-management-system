@@ -19,4 +19,13 @@ public class GlobalErrorHandler extends ResponseEntityExceptionHandler {
         errorResponse.setHttpStatus(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handlerForVerifyEmailException(final VerifyEmailException ex){
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setMessage(ex.getMessage());
+        errorResponse.setDebugMessage("Please verify your email");
+        errorResponse.setHttpStatus(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
 }

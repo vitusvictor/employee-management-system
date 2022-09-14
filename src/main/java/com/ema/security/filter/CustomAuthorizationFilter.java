@@ -32,6 +32,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     private final static Logger LOGGER = LoggerFactory.getLogger(CustomAuthorizationFilter.class);
     private final UserDetailsService userDetailsService;
     private final JwtUtils jwtUtil;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
