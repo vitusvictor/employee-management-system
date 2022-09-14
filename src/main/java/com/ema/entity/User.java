@@ -1,6 +1,7 @@
 package com.ema.entity;
 
 import com.ema.enums.Role;
+import com.ema.enums.UserStatus;
 import lombok.*;
 
 import javax.persistence.*;
@@ -35,7 +36,13 @@ public class User extends BaseClass {
    private String email;
 
    @NotNull
-   private String Address;
+   private boolean isEmailVerified;
+
+   @NotNull
+   private UserStatus userStatus;
+
+   @NotNull
+   private String address;
 
    @Enumerated(EnumType.STRING)
    private Role role;
@@ -50,12 +57,12 @@ public class User extends BaseClass {
                    "one lowercase letter, one special character and at least 8 or more characters")
    private String password;
 
+   private Date dateOfBirth;
 
    @ManyToOne
    @JoinColumn(name = "department_id", referencedColumnName = "id")
    private Department department;
 
-   private Date dateOfBirth;
 
    @OneToOne
    @JoinColumn(name = "salary_id", referencedColumnName = "id")
