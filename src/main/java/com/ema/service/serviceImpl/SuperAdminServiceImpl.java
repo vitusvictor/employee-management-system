@@ -2,19 +2,18 @@ package com.ema.service.serviceImpl;
 
 import com.ema.dto.CreateUserDto;
 import com.ema.dto.ModifyUserDto;
-import com.ema.entity.TemporaryUser;
 import com.ema.entity.User;
 import com.ema.enums.Role;
 import com.ema.enums.UserStatus;
 import com.ema.exception.ListIsEmpty;
 import com.ema.exception.UserAlreadyExists;
 import com.ema.exception.UserNotFound;
-import com.ema.repository.TemporaryUserRepository;
 import com.ema.repository.UserRepository;
 import com.ema.service.SuperAdminService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,11 +24,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final SuperAdminRegistrationServiceImpl superAdminRegistrationServiceImpl;
 
     private static final String EMAIL_VERIFICATION_LINK = "http://localhost:8080/api/v1/registration/confirm?token=";
-    private final TemporaryUserRepository temporaryUserRepository;
     private final UserRepository userRepository;
 
     @Override
-    public String createAdmin(CreateUserDto createUserDto) {
+    public String createAdmin(CreateUserDto createUserDto) throws MessagingException {
 
         //get the role of the user
         //code in the context holder to get the role of the user
@@ -38,12 +36,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 //        if(!contextHolder.getRole().equals(Role.SUPER_ADMIN)){
 //            throw new UnauthorizedOperation("You are not authorized to perform this operation");
 //        }
-        TemporaryUser dbTempUser = temporaryUserRepository.findByEmail(createUserDto.getEmail());
+        User dbTempUser = userRepository.findByEmail(createUserDto.getEmail());
 
         if (dbTempUser != null) {
             throw new UserAlreadyExists("User with email " + createUserDto.getEmail() + " already exists");
         }
-        TemporaryUser temporaryUser = TemporaryUser.builder()
+        User user = User.builder()
                 .imageUrl(createUserDto.getImageUrl())
                 .employeeId(createUserDto.getEmployeeId())
                 .firstName(createUserDto.getFirstName())
@@ -57,10 +55,10 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 .password(createUserDto.getPassword())
                 .dateOfBirth(createUserDto.getDateOfBirth())
                 .build();
-        temporaryUserRepository.save(temporaryUser);
+        userRepository.save(user);
 
         String token = UUID.randomUUID().toString();
-        superAdminRegistrationServiceImpl.saveToken(token, temporaryUser);
+        superAdminRegistrationServiceImpl.saveToken(token, user);
 
         String link = EMAIL_VERIFICATION_LINK + token;
         superAdminRegistrationServiceImpl.sendMailVerificationLink(createUserDto.getFirstName(), createUserDto.getEmail(), link);

@@ -1,16 +1,18 @@
 package com.ema.service;
 
 import com.ema.dto.CreateUserDto;
-import com.ema.entity.TemporaryUser;
+import com.ema.entity.User;
+
+import javax.mail.MessagingException;
 
 public interface SuperAdminRegistrationService {
-    String createSuperAdmin(CreateUserDto createUserDto);
+    String createSuperAdmin(CreateUserDto createUserDto) throws MessagingException;
 
-    void saveToken(String token, TemporaryUser temporaryUser);
+    void saveToken(String token, User user);
 
-    void resendVerificationEmail(TemporaryUser temporaryUser);
+    void resendVerificationEmail(User user) throws MessagingException;
 
-    String confirmToken(TemporaryUser temporaryUser);
+    String confirmToken(String token) throws MessagingException;
 
     void enableUser(String email);
 }

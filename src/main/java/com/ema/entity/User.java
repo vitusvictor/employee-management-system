@@ -19,52 +19,53 @@ import java.util.Date;
 @AllArgsConstructor
 @Table(name = "users_table")
 public class User extends BaseClass {
-   private String imageUrl;
+    private String imageUrl;
 
-   @NotNull
-   private String employeeId;
+    @NotNull
+    private String employeeId;
 
-   @NotNull
-   private String firstName;
+    @NotNull
+    private String firstName;
 
-   @NotNull
-   private String lastName;
+    @NotNull
+    private String lastName;
 
-   @NotNull
-   @Column(unique = true)
-   @Email
-   private String email;
+    @NotNull
+    @Column(unique = true)
+    @Email
+    private String email;
 
-   @NotNull
-   private boolean isEmailVerified;
+    @NotNull
+    private String address;
 
-   @NotNull
-   private UserStatus userStatus;
+    @NotNull
+    private boolean isEmailVerified;
 
-   @NotNull
-   private String address;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private UserStatus userStatus;
 
-   @Enumerated(EnumType.STRING)
-   private Role role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
-   @NotNull
-   private String phoneNumber;
+    @NotNull
+    private String phoneNumber;
 
-   @NotNull
-   @Size(min = 8, max = 45)
-   @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
-           message = "Password must contain at least one digit, one uppercase, " +
-                   "one lowercase letter, one special character and at least 8 or more characters")
-   private String password;
+    @NotNull
+    @Size(min = 8, max = 45)
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
+            message = "Password must contain at least one digit, one uppercase, " +
+                    "one lowercase letter, one special character and at least 8 or more characters")
+    private String password;
 
-   private Date dateOfBirth;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "department_id", referencedColumnName = "id")
+    private Department department;
 
-   @ManyToOne
-   @JoinColumn(name = "department_id", referencedColumnName = "id")
-   private Department department;
+    private Date dateOfBirth;
 
-
-   @OneToOne
-   @JoinColumn(name = "salary_id", referencedColumnName = "id")
-   private Salary salary;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "salary_id", referencedColumnName = "id")
+    private Salary salary;
 }
+

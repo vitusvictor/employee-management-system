@@ -4,12 +4,13 @@ import com.ema.dto.CreateUserDto;
 import com.ema.dto.ModifyUserDto;
 import com.ema.entity.User;
 
+import javax.mail.MessagingException;
 import java.util.List;
 
 public interface SuperAdminService {
     
 
-    String createAdmin(CreateUserDto createUserDto);
+    String createAdmin(CreateUserDto createUserDto) throws MessagingException;
 
     List<User> fetchAllAdmins();
 

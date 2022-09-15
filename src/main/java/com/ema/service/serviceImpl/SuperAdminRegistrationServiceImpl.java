@@ -1,20 +1,21 @@
 package com.ema.service.serviceImpl;
 
 import com.ema.dto.CreateUserDto;
-import com.ema.dto.MailRequest;
+import com.ema.dto.SendMailDto;
 import com.ema.entity.ConfirmationToken;
-import com.ema.entity.TemporaryUser;
 import com.ema.entity.User;
 import com.ema.enums.Role;
 import com.ema.enums.UserStatus;
 import com.ema.exception.*;
 import com.ema.repository.ConfirmationTokenRepository;
-import com.ema.repository.TemporaryUserRepository;
 import com.ema.repository.UserRepository;
+import com.ema.service.MailService;
 import com.ema.service.SuperAdminRegistrationService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
+import javax.validation.constraints.Email;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -23,22 +24,24 @@ import java.util.UUID;
 public class SuperAdminRegistrationServiceImpl implements SuperAdminRegistrationService {
 
     private static final String EMAIL_VERIFICATION_LINK = "http://localhost:8080/api/v1/registration/confirm?token=";
-    private final TemporaryUserRepository temporaryUserRepository;
+    private static final String USER_NOT_FOUND = "User not found";
     private final UserRepository userRepository;
     private final ConfirmationTokenRepository confirmationTokenRepository;
+    private final MailService mailService;
 
     @Override
-    public String createSuperAdmin(CreateUserDto createUserDto) {
-        Role role = temporaryUserRepository.findResourceById(Role.SUPER_ADMIN);
-        TemporaryUser dbUser = temporaryUserRepository.findByEmail(createUserDto.getEmail());
+    public String createSuperAdmin(CreateUserDto createUserDto) throws MessagingException {
+//        Role role = temporaryUserRepository.findResourceById(Role.SUPER_ADMIN);
+        User dbUser = userRepository.findByEmail(createUserDto.getEmail());
 
-        if (role != null && dbUser != null && dbUser.isEmailVerified() && dbUser.getRole().equals(Role.SUPER_ADMIN)) {
+        if (dbUser != null && dbUser.isEmailVerified() && dbUser.getRole().equals(Role.SUPER_ADMIN)) {
             throw new SuperAdminAlreadyExists("A Super Admin already exists");
         }
         if (!createUserDto.getPassword().equals(createUserDto.getConfirmPassword())) {
             throw new PasswordsDoNotMatch("Passwords do not  match");
         }
-        TemporaryUser temporaryUser = TemporaryUser.builder()
+
+        User user = User.builder()
                 .imageUrl(createUserDto.getImageUrl())
                 .employeeId("EMA" + createUserDto.getEmployeeId())
                 .firstName(createUserDto.getFirstName())
@@ -52,10 +55,10 @@ public class SuperAdminRegistrationServiceImpl implements SuperAdminRegistration
                 .password(createUserDto.getPassword())
                 .dateOfBirth(createUserDto.getDateOfBirth())
                 .build();
-        temporaryUserRepository.save(temporaryUser);
+        userRepository.save(user);
 
         String token = UUID.randomUUID().toString();
-        saveToken(token, temporaryUser);
+        saveToken(token, user);
 
         String link = EMAIL_VERIFICATION_LINK + token;
         sendMailVerificationLink(createUserDto.getFirstName(), createUserDto.getEmail(), link);
@@ -63,41 +66,51 @@ public class SuperAdminRegistrationServiceImpl implements SuperAdminRegistration
     }
 
     @Override
-    public void saveToken(String token, TemporaryUser temporaryUser) {
+    public void saveToken(String token, User user) {
         ConfirmationToken confirmationToken = ConfirmationToken.builder()
                 .expiresAt(LocalDateTime.now().plusMinutes(15))
-                .temporaryUser(temporaryUser)
+                .user(user)
                 .token(token)
                 .build();
         confirmationTokenRepository.save(confirmationToken);
     }
 
-    public void sendMailVerificationLink(String name, String email, String link) {
-        String subject = "Email Verification";
-        String body = "Click the link below to verify your email \n" + link;
-        MailRequest mailRequest = MailRequest.builder()
-                .body(body)
-                .name(name)
+    public void sendMailVerificationLink(String name, String email, String link) throws MessagingException {
+        String sendersName = "EMA Team";
+        String subject = "Verify your email";
+        String body = "Click the link below to verify your email address and activate your account to start using EMA. ";
+
+
+        SendMailDto sendMailDto = SendMailDto.builder()
+                .receiverEmail(email)
                 .subject(subject)
-                .to(email)
+                .senderName(sendersName)
+                .receiverName(name)
+                .body(body)
+                .salutation("Hi")
+                .signOff("Regards,")
+                .link(link)
                 .build();
-        mailService.sendMail(mailRequest);
+        mailService.mailWithAttachments(sendMailDto);
     }
 
     @Override
-    public void resendVerificationEmail(TemporaryUser temporaryUser) {
+    public void resendVerificationEmail(User user) throws MessagingException {
         String token = UUID.randomUUID().toString();
         String link = EMAIL_VERIFICATION_LINK + token;
-        sendMailVerificationLink(temporaryUser.getFirstName(), temporaryUser.getEmail(), link);
-        saveToken(token, temporaryUser);
+        sendMailVerificationLink(user.getFirstName(), user.getEmail(), link);
+        saveToken(token, user);
 
     }
 
     @Override
-    public String confirmToken(TemporaryUser temporaryUser) {
-        ConfirmationToken confirmationToken = confirmationTokenRepository
-                .findConfirmationTokenByTemporaryUserId(temporaryUser.getId())
-                .orElseThrow(() -> new TokenNotFoundException("Token not found"));
+    public String confirmToken(String token) throws MessagingException {
+
+        ConfirmationToken confirmationToken = confirmationTokenRepository.findByToken(token);
+        User user = userRepository.findByEmail(confirmationToken.getUser().getEmail());
+        if (confirmationToken == null) {
+            throw new TokenNotFound("Token not found");
+        }
 
         if (confirmationToken.getConfirmedAt() != null) {
             throw new EmailAlreadyConfirmed("Email already confirmed.");
@@ -105,44 +118,34 @@ public class SuperAdminRegistrationServiceImpl implements SuperAdminRegistration
 
         LocalDateTime expiredAt = confirmationToken.getExpiresAt();
         if (expiredAt.isBefore(LocalDateTime.now())) {
+
+            if (user == null) {
+                throw new UserNotFound(USER_NOT_FOUND);
+            }
+
             confirmationTokenRepository.delete(confirmationToken);
-            resendVerificationEmail(temporaryUser);
+
+            resendVerificationEmail(user);
             return "Verification link has expired. A new link has been sent to your email";
         }
         confirmationToken.setConfirmedAt(LocalDateTime.now());
+
         confirmationTokenRepository.save(confirmationToken);
-        enableUser(confirmationToken.getTemporaryUser().getEmail());
 
-        User user = User.builder()
-                .imageUrl(temporaryUser.getImageUrl())
-                .employeeId(temporaryUser.getEmployeeId())
-                .firstName(temporaryUser.getFirstName())
-                .lastName(temporaryUser.getLastName())
-                .email(temporaryUser.getEmail())
-                .isEmailVerified(true)
-                .userStatus(UserStatus.ACTIVE)
-                .address(temporaryUser.getAddress())
-                .role(temporaryUser.getRole())
-                .phoneNumber(temporaryUser.getPhoneNumber())
-                .password(temporaryUser.getPassword())
-                .dateOfBirth(temporaryUser.getDateOfBirth())
-                .build();
-        userRepository.save(user);
-
-        temporaryUserRepository.delete(temporaryUser);
+        enableUser(confirmationToken.getUser().getEmail());
         return "Email confirmed successfully";
 
     }
 
     @Override
     public void enableUser(String email) {
-        TemporaryUser temporaryUser = temporaryUserRepository.findByEmail(email);
-        if (temporaryUser == null) {
-            throw new UserNotFound("User not found");
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new UserNotFound(USER_NOT_FOUND);
         }else {
-            temporaryUser.setEmailVerified(true);
-            temporaryUser.setUserStatus(UserStatus.ACTIVE);
-            temporaryUserRepository.save(temporaryUser);
+            user.setEmailVerified(true);
+            user.setUserStatus(UserStatus.ACTIVE);
+            userRepository.save(user);
         }
     }
 }

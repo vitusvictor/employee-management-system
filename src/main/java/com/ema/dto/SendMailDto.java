@@ -1,14 +1,12 @@
 package com.ema.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class SendMailDto {
     private String receiverEmail;
     private String subject;
@@ -16,6 +14,6 @@ public class SendMailDto {
     private String receiverName;
     private String body;
     private String salutation;
-    private String signoff;
+    private String signOff;
     private String link;
 }

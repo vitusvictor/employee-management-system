@@ -7,15 +7,17 @@ import com.ema.service.SuperAdminService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import java.util.List;
 
 @AllArgsConstructor
 @RestController
+@RequestMapping("/superAdmin")
 public class SuperAdminController {
     private final SuperAdminService superAdminService;
 
     @PostMapping("/createAdmin")
-    public String createAdmin(@RequestBody CreateUserDto createUserDto){
+    public String createAdmin(@RequestBody CreateUserDto createUserDto) throws MessagingException {
         return superAdminService.createAdmin(createUserDto);
     }
 
