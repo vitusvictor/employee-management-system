@@ -1,6 +1,6 @@
 package com.ema.service.serviceImpl;
 
-import com.ema.exceptions.FailedMailException;
+import com.ema.exception.FailedMailException;
 import com.ema.dto.SendMailDto;
 import com.ema.service.MailService;
 import lombok.RequiredArgsConstructor;
@@ -68,7 +68,7 @@ public class MailServiceImpl implements MailService {
                 "<br><br>" +
                         sendMailDto.getBody() +
                 "<br>" +
-                        sendMailDto.getSignoff() +
+                        sendMailDto.getSignOff() +
                 "<br>" +
                         sendMailDto.getSenderName() +
                 "</div>" +
