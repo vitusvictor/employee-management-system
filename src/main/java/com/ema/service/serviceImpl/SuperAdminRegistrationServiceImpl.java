@@ -12,6 +12,7 @@ import com.ema.repository.UserRepository;
 import com.ema.service.MailService;
 import com.ema.service.SuperAdminRegistrationService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
@@ -28,6 +29,8 @@ public class SuperAdminRegistrationServiceImpl implements SuperAdminRegistration
     private final UserRepository userRepository;
     private final ConfirmationTokenRepository confirmationTokenRepository;
     private final MailService mailService;
+
+    private final BCryptPasswordEncoder encoder;
 
     @Override
     public String createSuperAdmin(CreateUserDto createUserDto) throws MessagingException {
@@ -52,7 +55,7 @@ public class SuperAdminRegistrationServiceImpl implements SuperAdminRegistration
                 .address(createUserDto.getAddress())
                 .role(Role.SUPER_ADMIN)
                 .phoneNumber(createUserDto.getPhoneNumber())
-                .password(createUserDto.getPassword())
+                .password(encoder.encode(createUserDto.getPassword()))
                 .dateOfBirth(createUserDto.getDateOfBirth())
                 .build();
         userRepository.save(user);

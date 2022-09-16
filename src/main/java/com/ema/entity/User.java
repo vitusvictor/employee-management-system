@@ -52,7 +52,7 @@ public class User extends BaseClass {
     private String phoneNumber;
 
     @NotNull
-    @Size(min = 8, max = 45)
+    @Size(min = 8)
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
             message = "Password must contain at least one digit, one uppercase, " +
                     "one lowercase letter, one special character and at least 8 or more characters")
