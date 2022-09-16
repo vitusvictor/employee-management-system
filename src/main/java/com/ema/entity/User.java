@@ -67,5 +67,6 @@ public class User extends BaseClass {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "salary_id", referencedColumnName = "id")
     private Salary salary;
+
 }
 

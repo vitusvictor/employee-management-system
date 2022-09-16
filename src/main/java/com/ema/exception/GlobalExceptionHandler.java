@@ -116,5 +116,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
     }
 
+    @ExceptionHandler(FeedNotFound.class)
+    public ResponseEntity<ErrorResponse> handlerForFeedNotFoundException(final FeedNotFound e) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setMessage(e.getMessage());
+        errorResponse.setDebugMessage("Password might not be invalid. Please check");
+        errorResponse.setHttpStatus(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
+    }
+
 
 }
