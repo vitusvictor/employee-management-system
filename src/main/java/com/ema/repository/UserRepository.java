@@ -11,11 +11,14 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Role findResourceById(Role superAdmin);
+
     User findByEmail(String email);
+
     List<User> findAllByRole(Role role);
 
     List<User> findUserByFirstNameOrLastNameContainingIgnoreCase(String firstName, String lastName);
 
+    User findUserByEmail(String email);
+
+//    Optional<User> findByEmail(String email);
 }
-
-
