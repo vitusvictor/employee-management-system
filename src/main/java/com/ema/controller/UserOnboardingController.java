@@ -6,9 +6,13 @@ import com.ema.service.serviceImpl.AuthenticationServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,7 +27,8 @@ public class UserOnboardingController {
         return new ResponseEntity<>(new LoginResponseDto(token), HttpStatus.OK);
     }
 
-    public ResponseEntity<String> logout (){
-        return ResponseEntity.ok(authenticate.logout());
+    @GetMapping("/logout")
+    public void logout (HttpServletRequest request, HttpServletResponse response){
+        authenticate.logout(request, response);
     }
 }

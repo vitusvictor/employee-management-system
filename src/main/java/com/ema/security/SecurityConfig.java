@@ -32,11 +32,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable();
-        http.authorizeRequests().antMatchers("/", "/login", "/createSuperAdmin", "/registration/confirm").permitAll();
+        http.authorizeRequests().antMatchers("/", "/login", "/createSuperAdmin", "/registration/confirm", "/logout").permitAll();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilterBefore(customAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
         http.logout()
+                .permitAll()
                 .logoutSuccessUrl("/login")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID");

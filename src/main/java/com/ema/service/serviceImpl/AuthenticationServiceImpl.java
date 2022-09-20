@@ -12,12 +12,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -40,18 +46,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = userRepository.findByEmail(loginRequestPayLoad.getEmail());
 
         if (user == null) {
-            throw new UsernameNotFoundException("user not found!");
+            throw new UserNotFound("user not found!");
         }
 
         if (!encoder.matches(loginRequestPayLoad.getPassword(), user.getPassword())) {
             throw new UserNotFound("invalid login credentials!");
         }
 
-        if (!user.getEmail().equals(loginRequestPayLoad.getEmail())) {
-            throw new UserNotFound("invalid login credentials!");
-        }
-
-        if(user.getUserStatus() != UserStatus.ACTIVE){
+        if(!user.getEmail().isEmpty() && user.getUserStatus() != UserStatus.ACTIVE){
             throw new VerifyEmailException("Please verify your email!");
         }
 
@@ -69,8 +71,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public String logout() {
-        httpSession.invalidate();
-        return null;
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null){
+            new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
+        SecurityContextHolder.getContext().setAuthentication(null);
     }
+
 }
